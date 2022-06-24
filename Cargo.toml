@@ -1,0 +1,9 @@
+[workspace]
+members = [
+    "librecollect",
+    "recollectd",
+    "recollectctl",
+]
+
+[profile.release]
+lto = true

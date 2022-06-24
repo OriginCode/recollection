@@ -52,12 +52,12 @@ impl Event {
     }
 
     /// Validates the schedule and update the schedule if it is valid.
-    pub fn update_schedule<S: AsRef<str>>(&mut self, schedule: S) -> Result<(), Error> {
-        let sched = schedule.as_ref();
+    pub fn update_schedule<S: Into<String>>(&mut self, schedule: S) -> Result<(), Error> {
+        let sched = schedule.into();
 
-        Schedule::from_str(schd)
-            .map(|_| self.schedule = sched.to_owned())
-            .map_err(|_| Error::ParseEventError(sched.to_string()))?;
+        Schedule::from_str(&sched)
+            .map(|_| self.schedule = sched.clone())
+            .map_err(|_| Error::ParseEventError(sched))?;
 
         Ok(())
     }
@@ -70,7 +70,10 @@ mod tests {
     #[test]
     fn test_schedule() {
         let event = Event::new("* * * * * * *", "summary", "body");
-        let schedule = event.schedule().unwrap();
-        dbg!(schedule);
+
+        assert_eq!(
+            event.schedule().unwrap(),
+            Schedule::from_str("* * * * * * *").unwrap()
+        );
     }
 }

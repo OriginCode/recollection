@@ -26,9 +26,9 @@ impl Display for Event {
 }
 
 impl Event {
-    pub fn new<Schd, Sum, Body>(schedule: Schd, summary: Sum, body: Body) -> Self
+    pub fn new<Sched, Sum, Body>(schedule: Sched, summary: Sum, body: Body) -> Self
     where
-        Schd: Into<String>,
+        Sched: Into<String>,
         Sum: Into<String>,
         Body: Into<String>,
     {
@@ -53,11 +53,11 @@ impl Event {
 
     /// Validates the schedule and update the schedule if it is valid.
     pub fn update_schedule<S: AsRef<str>>(&mut self, schedule: S) -> Result<(), Error> {
-        let schd = schedule.as_ref();
+        let sched = schedule.as_ref();
 
         Schedule::from_str(schd)
-            .map(|_| self.schedule = schd.to_owned())
-            .map_err(|_| Error::ParseEventError(schd.to_string()))?;
+            .map(|_| self.schedule = sched.to_owned())
+            .map_err(|_| Error::ParseEventError(sched.to_string()))?;
 
         Ok(())
     }

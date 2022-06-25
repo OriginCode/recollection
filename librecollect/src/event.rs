@@ -17,7 +17,7 @@ impl Display for Event {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "{schedule}\n{summary}\n{body}",
+            "{schedule}\nSummary: {summary}\nBody: {body}",
             schedule = self.schedule,
             summary = self.summary,
             body = self.body
@@ -25,23 +25,35 @@ impl Display for Event {
     }
 }
 
+/// Test if the schedule string is valid in cron format.
+pub fn validate_schedule<Sched: AsRef<str>>(schedule: Sched) -> Result<(), Error> {
+    let schedule = schedule.as_ref();
+
+    Schedule::from_str(schedule).map_err(|_| Error::ParseSchedError(schedule.to_owned()))?;
+
+    Ok(())
+}
+
 impl Event {
-    pub fn new<Sched, Sum, Body>(schedule: Sched, summary: Sum, body: Body) -> Self
+    pub fn new<Sched, Sum, Body>(schedule: Sched, summary: Sum, body: Body) -> Result<Self, Error>
     where
         Sched: Into<String>,
         Sum: Into<String>,
         Body: Into<String>,
     {
-        Self {
-            schedule: schedule.into(),
+        let schedule = schedule.into();
+        validate_schedule(&schedule)?;
+
+        Ok(Self {
+            schedule,
             summary: summary.into(),
             body: body.into(),
-        }
+        })
     }
 
-    pub fn schedule(&self) -> Result<Schedule, Error> {
-        Schedule::from_str(&self.schedule)
-            .map_err(|_| Error::ParseEventError(self.schedule.clone()))
+    pub fn schedule(&self) -> Schedule {
+        // Should not panic as we've already validated the schedule string.
+        Schedule::from_str(&self.schedule).unwrap()
     }
 
     pub fn notification(&self) -> Notification {
@@ -51,13 +63,13 @@ impl Event {
             .finalize()
     }
 
-    /// Validates the schedule and update the schedule if it is valid.
+    /// Validates the schedule string and update the schedule if it is valid.
     pub fn update_schedule<S: Into<String>>(&mut self, schedule: S) -> Result<(), Error> {
         let sched = schedule.into();
 
         Schedule::from_str(&sched)
             .map(|_| self.schedule = sched.clone())
-            .map_err(|_| Error::ParseEventError(sched))?;
+            .map_err(|_| Error::ParseSchedError(sched))?;
 
         Ok(())
     }

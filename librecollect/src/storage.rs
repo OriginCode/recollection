@@ -8,6 +8,7 @@ pub trait Storage {
     where
         Self: Sized;
     fn write(&self) -> Result<(), Error>;
+    fn events(&mut self) -> &mut Vec<Event>;
 }
 
 pub struct JsonStorage {
@@ -39,5 +40,9 @@ impl Storage for JsonStorage {
         fs::write(&self.path, serde_json::to_string_pretty(&self.events)?)?;
 
         Ok(())
+    }
+
+    fn events(&mut self) -> &mut Vec<Event> {
+        &mut self.events
     }
 }

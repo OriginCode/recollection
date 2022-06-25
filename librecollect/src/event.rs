@@ -1,8 +1,8 @@
+use chrono::{DateTime, Utc};
 use cron::Schedule;
 use notify_rust::Notification;
 use serde::{Deserialize, Serialize};
-use std::fmt::Display;
-use std::str::FromStr;
+use std::{fmt::Display, str::FromStr};
 
 use crate::RecollectError as Error;
 
@@ -11,6 +11,7 @@ pub struct Event {
     schedule: String,
     pub summary: String,
     pub body: String,
+    pub next: Option<DateTime<Utc>>,
 }
 
 impl Display for Event {
@@ -22,6 +23,12 @@ impl Display for Event {
             summary = self.summary,
             body = self.body
         )
+    }
+}
+
+impl PartialEq for Event {
+    fn eq(&self, other: &Self) -> bool {
+        self.schedule == other.schedule && self.summary == other.summary && self.body == other.body
     }
 }
 
@@ -48,12 +55,27 @@ impl Event {
             schedule,
             summary: summary.into(),
             body: body.into(),
+            next: None,
         })
     }
 
     pub fn schedule(&self) -> Schedule {
         // Should not panic as we've already validated the schedule string.
         Schedule::from_str(&self.schedule).unwrap()
+    }
+
+    /// Returns the next time the notification should be sent.
+    /// If `self.next` is None, this will return the next approaching time and update the next
+    /// field, otherwise returns the time stored in `self.next` to show the missing time.
+    pub fn next_time(&mut self) -> DateTime<Utc> {
+        self.next.unwrap_or_else(|| self.update_next_time())
+    }
+
+    /// Updates the next time the notification should be sent and returns it.
+    pub fn update_next_time(&mut self) -> DateTime<Utc> {
+        let next = self.schedule().upcoming(Utc).take(1).next().unwrap();
+        self.next = Some(next);
+        next
     }
 
     pub fn notification(&self) -> Notification {

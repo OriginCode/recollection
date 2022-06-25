@@ -44,11 +44,9 @@ pub(crate) fn remove<S: Storage>(storage: &mut S) -> Result<()> {
         .with_prompt("Select events to be removed")
         .items(storage.events())
         .interact()?;
-    let mut offset = 0usize;
 
-    for index in to_be_removed {
+    for (offset, index) in to_be_removed.into_iter().enumerate() {
         storage.events().remove(index - offset);
-        offset += 1;
     }
 
     Ok(())

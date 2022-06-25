@@ -24,7 +24,7 @@ fn main() -> Result<()> {
 
     match args.subcommand {
         Some(s) => match s {
-            Subcommand::List => data.events.iter().for_each(|e| println!("{}\n", e)),
+            Subcommand::List => data.events().iter().for_each(|e| println!("{}\n", e)),
             Subcommand::Clear => interface::clear(&mut data)?,
             Subcommand::Add => interface::add(&mut data)?,
             Subcommand::Remove => interface::remove(&mut data)?,

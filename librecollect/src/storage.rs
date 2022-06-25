@@ -1,19 +1,29 @@
-use std::{fs, path::PathBuf};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use crate::{event::Event, RecollectError as Error};
 
-pub trait Storage {
+pub trait Storage: PartialEq {
     fn new<P: Into<PathBuf>>(path: P) -> Self;
     fn load<P: Into<PathBuf>>(path: P) -> Result<Self, Error>
     where
         Self: Sized;
     fn write(&self) -> Result<(), Error>;
     fn events(&mut self) -> &mut Vec<Event>;
+    fn path(&self) -> &Path;
 }
 
 pub struct JsonStorage {
-    pub events: Vec<Event>,
+    events: Vec<Event>,
     path: PathBuf,
+}
+
+impl PartialEq for JsonStorage {
+    fn eq(&self, other: &Self) -> bool {
+        self.events == other.events
+    }
 }
 
 impl Storage for JsonStorage {
@@ -44,5 +54,9 @@ impl Storage for JsonStorage {
 
     fn events(&mut self) -> &mut Vec<Event> {
         &mut self.events
+    }
+
+    fn path(&self) -> &Path {
+        &self.path
     }
 }

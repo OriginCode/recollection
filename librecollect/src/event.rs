@@ -103,10 +103,10 @@ mod tests {
 
     #[test]
     fn test_schedule() {
-        let event = Event::new("* * * * * * *", "summary", "body");
+        let event = Event::new("* * * * * * *", "summary", "body").unwrap();
 
         assert_eq!(
-            event.schedule().unwrap(),
+            event.schedule(),
             Schedule::from_str("* * * * * * *").unwrap()
         );
     }

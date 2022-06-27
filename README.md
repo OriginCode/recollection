@@ -30,7 +30,13 @@ ExecStart=/your/path/to/recollectd
 
 ## Install
 
-You can install from source using `cargo`
+You can install from <crates.io> using `cargo`
+
+```bash
+cargo install --locked recollectctl recollectd
+```
+
+Or, build from source
 
 ```bash
 cargo install --git=https://factoria.origincode.me/OriginCode/recollection.git

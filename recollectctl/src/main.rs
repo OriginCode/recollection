@@ -24,12 +24,14 @@ fn main() -> Result<()> {
 
     match args.subcommand {
         Some(s) => match s {
+            Subcommand::Init => (),  // do nothing as we've created an empty data above
             Subcommand::List => data.events().iter().for_each(|e| println!("{}\n", e)),
             Subcommand::Clear => interface::clear(&mut data)?,
             Subcommand::Add => interface::add(&mut data)?,
             Subcommand::Remove => interface::remove(&mut data)?,
+            Subcommand::Edit => interface::select_edit(&mut data)?,
         },
-        None => interface::select_edit(&mut data)?,
+        None => unreachable!(),
     }
 
     data.write()?;

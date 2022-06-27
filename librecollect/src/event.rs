@@ -18,7 +18,7 @@ impl Display for Event {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "{schedule}\nSummary: {summary}\nBody: {body}",
+            "Schedule: {schedule}\nSummary: {summary}\nBody: {body}",
             schedule = self.schedule,
             summary = self.summary,
             body = self.body

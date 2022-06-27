@@ -1,8 +1,8 @@
-<p style="text-align: center">
+<p align="center">
     <img src="misc/logo.png" width="128" alt="Logo of Recollection" style="border-radius: 10%">
 </p>
 
-<div style="text-align: center"> 
+<div align="center"> 
 
 # Recollection
 

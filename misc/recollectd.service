@@ -1,0 +1,9 @@
+[Unit]
+Description=Recollection daemon for sending notifications
+
+[Service]
+Environment=RUST_LOG=info
+ExecStart=/usr/bin/recollectd
+
+[Install]
+WantedBy=multi-user.target

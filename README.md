@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="misc/logo.png" width="128" alt="Logo of Recollection" style="border-radius: 10%">
+    <img src="misc/logo.png" width="128" alt="Logo of Recollection">
 </p>
 
 <div align="center"> 

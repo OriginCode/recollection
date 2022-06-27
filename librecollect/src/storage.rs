@@ -13,6 +13,7 @@ pub trait Storage: PartialEq {
     fn write(&self) -> Result<(), Error>;
     fn events(&mut self) -> &mut Vec<Event>;
     fn path(&self) -> &Path;
+    fn into_inner(self) -> Vec<Event>;
 }
 
 pub struct JsonStorage {
@@ -58,5 +59,10 @@ impl Storage for JsonStorage {
 
     fn path(&self) -> &Path {
         &self.path
+    }
+
+    /// Consumes the storage and returns the owned vector of events.
+    fn into_inner(self) -> Vec<Event> {
+        self.events
     }
 }

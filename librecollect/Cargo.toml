@@ -1,9 +1,13 @@
 [package]
 name = "librecollect"
 version = "0.1.0"
+license = "MIT"
+authors = ["Kaiyang Wu <self@origincode.me>"]
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "Recollection library for the project"
+repository = "https://factoria.origincode.me/OriginCode/recollection"
+homepage = "https://factoria.origincode.me/OriginCode/recollection"
+readme = "../README.md"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }

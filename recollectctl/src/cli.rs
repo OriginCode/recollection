@@ -4,7 +4,7 @@ use std::path::PathBuf;
 /// Recollection CLI Manager
 #[derive(Parser, Debug)]
 #[clap(about, author, version)]
-pub struct Args {
+pub(crate) struct Args {
     /// Path to the data file
     #[clap(short, long, value_parser)]
     pub data: Option<PathBuf>,
@@ -13,7 +13,7 @@ pub struct Args {
 }
 
 #[derive(Parser, Debug)]
-pub enum Subcommand {
+pub(crate) enum Subcommand {
     /// List all events
     List,
     /// Clear all events

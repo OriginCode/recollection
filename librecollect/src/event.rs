@@ -42,6 +42,12 @@ pub fn validate_schedule<Sched: AsRef<str>>(schedule: Sched) -> Result<(), Error
 }
 
 impl Event {
+    /// Creates a new event.
+    ///
+    /// # Errors
+    ///
+    /// When the schedule string is invalid in cron format, `RecollectError::ParseSchedError` will
+    /// be returned.
     pub fn new<Sched, Sum, Body>(schedule: Sched, summary: Sum, body: Body) -> Result<Self, Error>
     where
         Sched: Into<String>,
@@ -59,14 +65,16 @@ impl Event {
         })
     }
 
+    /// Returns the cron formatted `Schedule` object.
     pub fn schedule(&self) -> Schedule {
         // Should not panic as we've already validated the schedule string.
         Schedule::from_str(&self.schedule).unwrap()
     }
 
     /// Returns the next time the notification should be sent.
-    /// If `self.next` is None, this will return the next approaching time and update the next
-    /// field, otherwise returns the time stored in `self.next` to show the missing time.
+    ///
+    /// If `self.next` is None, this will return the next approaching time and update the `next`
+    /// field, otherwise it will return the time stored in `self.next` to show the missed time.
     pub fn next_time(&mut self) -> DateTime<Utc> {
         self.next.unwrap_or_else(|| self.update_next_time())
     }
@@ -78,6 +86,7 @@ impl Event {
         next
     }
 
+    /// Returns the notification to be sent.
     pub fn notification(&self) -> Notification {
         Notification::new()
             .summary(&self.summary)
@@ -86,6 +95,11 @@ impl Event {
     }
 
     /// Validates the schedule string and update the schedule if it is valid.
+    ///
+    /// # Errors
+    ///
+    /// When the schedule string is invalid in cron format, `RecollectError::ParseSchedError` will
+    /// be returned.
     pub fn update_schedule<S: Into<String>>(&mut self, schedule: S) -> Result<(), Error> {
         let sched = schedule.into();
 

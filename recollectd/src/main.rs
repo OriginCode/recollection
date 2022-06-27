@@ -48,14 +48,10 @@ fn main() -> Result<()> {
             if Utc::now() >= event.next_time() {
                 event.notification().appname("Recollection").show()?;
                 info!(
-                    "Notification sent, event: {event}",
-                    event = serde_json::to_string(event)?
-                );
-
-                // Update the next notification time.
-                info!(
-                    "Next time: {next}",
-                    next = event.update_next_time().to_rfc3339()
+                    "Notification sent, event: {event}, next time: {next}",
+                    event = serde_json::to_string(event)?,
+                    // Update the next notification time.
+                    next = event.update_next_time().to_rfc3339(),
                 );
             }
         }

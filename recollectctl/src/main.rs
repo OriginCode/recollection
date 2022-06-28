@@ -5,7 +5,7 @@ use librecollect::{JsonStorage, Storage};
 use std::fs;
 
 mod cli;
-mod interface;
+mod command;
 
 use cli::{Args, Subcommand};
 
@@ -26,11 +26,11 @@ fn main() -> Result<()> {
         Some(s) => match s {
             Subcommand::Init => (), // do nothing as we've created an empty data above
             Subcommand::List => data.events().iter().for_each(|e| println!("{}\n", e)),
-            Subcommand::Clear => interface::clear(&mut data)?,
-            Subcommand::Add => interface::add(&mut data)?,
-            Subcommand::Remove => interface::remove(&mut data)?,
-            Subcommand::Edit => interface::select_edit(&mut data)?,
-            Subcommand::Disable => interface::disable(&mut data)?,
+            Subcommand::Clear => command::clear(&mut data)?,
+            Subcommand::Add => command::add(&mut data)?,
+            Subcommand::Remove => command::remove(&mut data)?,
+            Subcommand::Edit => command::select_edit(&mut data)?,
+            Subcommand::Disable => command::disable(&mut data)?,
         },
         None => unreachable!(),
     }

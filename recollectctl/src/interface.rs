@@ -103,11 +103,7 @@ pub(crate) fn select_edit<S: Storage>(storage: &mut S) -> Result<()> {
 
 pub(crate) fn disable<S: Storage>(storage: &mut S) -> Result<()> {
     let disabled = storage.events().iter().fold(Vec::new(), |mut acc, event| {
-        if event.disabled {
-            acc.push(true);
-        } else {
-            acc.push(false);
-        }
+        acc.push(event.disabled);
         acc
     });
     let to_be_disabled = MultiSelect::with_theme(&ColorfulTheme::default())

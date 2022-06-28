@@ -49,13 +49,13 @@ fn main() -> Result<()> {
             }
 
             // In case if the notification should be sent a while ago, we can still pick it up.
-            if Utc::now() >= event.next_time() {
+            if Utc::now() >= event.upcoming() {
                 event.notification().appname("Recollection").show()?;
                 info!(
                     "Notification sent, event: {event}, next time: {next}",
                     event = serde_json::to_string(event)?,
                     // Update the next notification time.
-                    next = event.update_next_time().to_rfc3339(),
+                    next = event.update_upcoming().to_rfc3339(),
                 );
             }
         }

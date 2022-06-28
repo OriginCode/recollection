@@ -11,8 +11,8 @@ pub struct Event {
     schedule: String,
     pub summary: String,
     pub body: String,
-    pub next: Option<DateTime<Utc>>,
     pub disabled: bool,
+    pub upcoming: Option<DateTime<Utc>>,
 }
 
 impl Display for Event {
@@ -68,8 +68,8 @@ impl Event {
             schedule,
             summary: summary.into(),
             body: body.into(),
-            next: None,
             disabled,
+            upcoming: None,
         })
     }
 
@@ -81,17 +81,18 @@ impl Event {
 
     /// Returns the next time the notification should be sent.
     ///
-    /// If `self.next` is None, this will return the next approaching time and update the `next`
-    /// field, otherwise it will return the time stored in `self.next` to show the missed time.
-    pub fn next_time(&mut self) -> DateTime<Utc> {
-        self.next.unwrap_or_else(|| self.update_next_time())
+    /// If `self.upcoming` is None, this will return the next approaching time and update the
+    /// `upcoming` field, otherwise it will return the time stored in `self.upcoming` to show the
+    /// missed time.
+    pub fn upcoming(&mut self) -> DateTime<Utc> {
+        self.upcoming.unwrap_or_else(|| self.update_upcoming())
     }
 
-    /// Updates the next time the notification should be sent and returns it.
-    pub fn update_next_time(&mut self) -> DateTime<Utc> {
-        let next = self.schedule().upcoming(Utc).take(1).next().unwrap();
-        self.next = Some(next);
-        next
+    /// Updates the upcoming time the notification should be sent and returns it.
+    pub fn update_upcoming(&mut self) -> DateTime<Utc> {
+        let upcoming = self.schedule().upcoming(Utc).take(1).next().unwrap();
+        self.upcoming = Some(upcoming);
+        upcoming
     }
 
     /// Returns the notification to be sent.
@@ -125,7 +126,7 @@ mod tests {
 
     #[test]
     fn test_schedule() {
-        let event = Event::new("* * * * * * *", "summary", "body").unwrap();
+        let event = Event::new("* * * * * * *", "summary", "body", false).unwrap();
 
         assert_eq!(
             event.schedule(),

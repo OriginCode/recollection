@@ -44,6 +44,10 @@ fn main() -> Result<()> {
         update_data(&mut data)?;
 
         for event in data.events() {
+            if event.disabled {
+                continue;
+            }
+
             // In case if the notification should be sent a while ago, we can still pick it up.
             if Utc::now() >= event.next_time() {
                 event.notification().appname("Recollection").show()?;

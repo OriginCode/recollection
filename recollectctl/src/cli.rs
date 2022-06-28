@@ -26,4 +26,6 @@ pub(crate) enum Subcommand {
     Remove,
     /// Edit events
     Edit,
+    /// Disable events
+    Disable,
 }

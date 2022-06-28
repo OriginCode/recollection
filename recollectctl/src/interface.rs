@@ -33,8 +33,14 @@ pub(crate) fn add<S: Storage>(storage: &mut S) -> Result<()> {
     let body: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt("Event body")
         .interact()?;
+    let disabled: bool = Confirm::with_theme(&ColorfulTheme::default())
+        .with_prompt("Disable the event by default?")
+        .default(false)
+        .interact()?;
 
-    storage.events().push(Event::new(schedule, summary, body)?);
+    storage
+        .events()
+        .push(Event::new(schedule, summary, body, disabled)?);
 
     Ok(())
 }
@@ -74,6 +80,10 @@ fn edit(event: &mut Event) -> Result<()> {
         .with_prompt("Event body")
         .with_initial_text(&event.body)
         .interact()?;
+    event.disabled = Confirm::with_theme(&ColorfulTheme::default())
+        .with_prompt("Disable event?")
+        .default(false)
+        .interact()?;
 
     Ok(())
 }
@@ -86,6 +96,28 @@ pub(crate) fn select_edit<S: Storage>(storage: &mut S) -> Result<()> {
 
     for index in to_be_edited {
         edit(&mut storage.events()[index])?;
+    }
+
+    Ok(())
+}
+
+pub(crate) fn disable<S: Storage>(storage: &mut S) -> Result<()> {
+    let disabled = storage.events().iter().fold(Vec::new(), |mut acc, event| {
+        if event.disabled {
+            acc.push(true);
+        } else {
+            acc.push(false);
+        }
+        acc
+    });
+    let to_be_disabled = MultiSelect::with_theme(&ColorfulTheme::default())
+        .with_prompt("Select events to be edited")
+        .items(storage.events())
+        .defaults(&disabled)
+        .interact()?;
+
+    for index in to_be_disabled {
+        storage.events()[index].disabled = true;
     }
 
     Ok(())

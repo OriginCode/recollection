@@ -12,16 +12,18 @@ pub struct Event {
     pub summary: String,
     pub body: String,
     pub next: Option<DateTime<Utc>>,
+    pub disabled: bool,
 }
 
 impl Display for Event {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Schedule: {schedule}\nSummary: {summary}\nBody: {body}",
+            "Schedule: {schedule}\nSummary: {summary}\nBody: {body}\nDisabled: {disabled}",
             schedule = self.schedule,
             summary = self.summary,
-            body = self.body
+            body = self.body,
+            disabled = self.disabled,
         )
     }
 }
@@ -48,7 +50,12 @@ impl Event {
     ///
     /// When the schedule string is invalid in cron format, `RecollectError::ParseSchedError` will
     /// be returned.
-    pub fn new<Sched, Sum, Body>(schedule: Sched, summary: Sum, body: Body) -> Result<Self, Error>
+    pub fn new<Sched, Sum, Body>(
+        schedule: Sched,
+        summary: Sum,
+        body: Body,
+        disabled: bool,
+    ) -> Result<Self, Error>
     where
         Sched: Into<String>,
         Sum: Into<String>,
@@ -62,6 +69,7 @@ impl Event {
             summary: summary.into(),
             body: body.into(),
             next: None,
+            disabled,
         })
     }
 

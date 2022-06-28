@@ -18,6 +18,14 @@ events and send notifications.
 Before running `recollectd`, please execute `recollectctl init` to initialize the
 data file or `recollectctl new` to create an event, otherwise the daemon will fail.
 
+For more information, please run
+
+```bash
+recollectctl help
+# and
+recollectd help
+```
+
 ### Systemd
 
 A sample systemd service file can be found in `misc/recollectd.service`. For

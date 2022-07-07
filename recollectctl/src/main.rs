@@ -31,6 +31,7 @@ fn main() -> Result<()> {
             Subcommand::Remove => command::remove(&mut data)?,
             Subcommand::Edit => command::select_edit(&mut data)?,
             Subcommand::Disable => command::disable(&mut data)?,
+            Subcommand::Upcoming(args) => command::upcoming(&mut data, args.count)?,
         },
         None => unreachable!(),
     }

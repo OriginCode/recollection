@@ -88,6 +88,11 @@ impl Event {
         self.upcoming.unwrap_or_else(|| self.update_upcoming())
     }
 
+    /// Returns the timeline of upcoming events
+    pub fn upcoming_timeline(&self, n: usize) -> Vec<DateTime<Utc>> {
+        self.schedule().upcoming(Utc).take(n).collect()
+    }
+
     /// Updates the upcoming time the notification should be sent and returns it.
     pub fn update_upcoming(&mut self) -> DateTime<Utc> {
         let upcoming = self.schedule().upcoming(Utc).take(1).next().unwrap();

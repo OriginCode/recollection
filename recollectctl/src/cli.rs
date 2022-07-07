@@ -28,4 +28,12 @@ pub(crate) enum Subcommand {
     Edit,
     /// Disable events
     Disable,
+    /// Show upcoming times
+    Upcoming(Upcoming),
+}
+
+#[derive(Parser, Debug)]
+pub(crate) struct Upcoming {
+    /// Number of upcoming times to show
+    pub count: usize,
 }

@@ -118,3 +118,22 @@ pub(crate) fn disable<S: Storage>(storage: &mut S) -> Result<()> {
 
     Ok(())
 }
+
+pub(crate) fn upcoming<S: Storage>(storage: &mut S, n: usize) -> Result<()> {
+    let events = MultiSelect::with_theme(&ColorfulTheme::default())
+        .with_prompt("Select events")
+        .items(storage.events())
+        .interact()?;
+
+    events.iter().for_each(|index| {
+        let event = &storage.events()[*index];
+
+        println!("{}:", event.summary);
+        event.upcoming_timeline(n).iter().for_each(|time| {
+            println!("{}", time);
+        });
+        println!();
+    });
+
+    Ok(())
+}

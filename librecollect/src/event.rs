@@ -15,6 +15,12 @@ pub struct Event {
     pub upcoming: Option<DateTime<Utc>>,
 }
 
+#[derive(Debug)]
+pub struct Summary<'a> {
+    schedule: &'a str,
+    summary: &'a str,
+}
+
 impl Display for Event {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
@@ -24,6 +30,17 @@ impl Display for Event {
             summary = self.summary,
             body = self.body,
             disabled = self.disabled,
+        )
+    }
+}
+
+impl<'a> Display for Summary<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Schedule: {schedule}, Summary: {summary}",
+            schedule = self.schedule,
+            summary = self.summary,
         )
     }
 }
@@ -122,6 +139,14 @@ impl Event {
             .map_err(|_| Error::ParseSchedError(sched))?;
 
         Ok(())
+    }
+    
+    /// Returns the summary of the event.
+    pub fn summary(&self) -> Summary {
+        Summary {
+            schedule: &self.schedule,
+            summary: &self.summary,
+        }
     }
 }
 

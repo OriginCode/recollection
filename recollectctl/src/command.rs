@@ -46,14 +46,15 @@ pub(crate) fn add<S: Storage>(storage: &mut S) -> Result<()> {
 }
 
 pub(crate) fn remove<S: Storage>(storage: &mut S) -> Result<()> {
-    let to_be_removed = MultiSelect::with_theme(&ColorfulTheme::default())
+    MultiSelect::with_theme(&ColorfulTheme::default())
         .with_prompt("Select events to be removed")
-        .items(storage.events())
-        .interact()?;
-
-    for (offset, index) in to_be_removed.into_iter().enumerate() {
-        storage.events().remove(index - offset);
-    }
+        .items(&storage.summary())
+        .interact()?
+        .into_iter()
+        .enumerate()
+        .for_each(|(offset, index)| {
+            storage.events().remove(index - offset);
+        });
 
     Ok(())
 }
@@ -89,51 +90,48 @@ fn edit(event: &mut Event) -> Result<()> {
 }
 
 pub(crate) fn select_edit<S: Storage>(storage: &mut S) -> Result<()> {
-    let to_be_edited = MultiSelect::with_theme(&ColorfulTheme::default())
+    MultiSelect::with_theme(&ColorfulTheme::default())
         .with_prompt("Select events to be edited")
-        .items(storage.events())
-        .interact()?;
-
-    for index in to_be_edited {
-        edit(&mut storage.events()[index])?;
-    }
+        .items(&storage.summary())
+        .interact()?
+        .into_iter()
+        .try_for_each(|index| edit(&mut storage.events()[index]))?;
 
     Ok(())
 }
 
 pub(crate) fn disable<S: Storage>(storage: &mut S) -> Result<()> {
-    let disabled = storage.events().iter().fold(Vec::new(), |mut acc, event| {
-        acc.push(event.disabled);
-        acc
-    });
-    let to_be_disabled = MultiSelect::with_theme(&ColorfulTheme::default())
+    MultiSelect::with_theme(&ColorfulTheme::default())
         .with_prompt("Select events to be edited")
-        .items(storage.events())
-        .defaults(&disabled)
-        .interact()?;
-
-    for index in to_be_disabled {
-        storage.events()[index].disabled = true;
-    }
+        .items(&storage.summary())
+        .defaults(&storage.events().iter().fold(Vec::new(), |mut acc, event| {
+            acc.push(event.disabled);
+            acc
+        }))
+        .interact()?
+        .into_iter()
+        .for_each(|index| {
+            storage.events()[index].disabled = true;
+        });
 
     Ok(())
 }
 
 pub(crate) fn upcoming<S: Storage>(storage: &mut S, n: usize) -> Result<()> {
-    let events = MultiSelect::with_theme(&ColorfulTheme::default())
+    MultiSelect::with_theme(&ColorfulTheme::default())
         .with_prompt("Select events")
-        .items(storage.events())
-        .interact()?;
+        .items(&storage.summary())
+        .interact()?
+        .into_iter()
+        .for_each(|index| {
+            let event = &storage.events()[index];
 
-    events.iter().for_each(|index| {
-        let event = &storage.events()[*index];
-
-        println!("{}:", event.summary);
-        event.upcoming_timeline(n).iter().for_each(|time| {
-            println!("{}", time);
+            println!("{}:", event.summary);
+            event.upcoming_timeline(n).iter().for_each(|time| {
+                println!("{}", time);
+            });
+            println!();
         });
-        println!();
-    });
 
     Ok(())
 }

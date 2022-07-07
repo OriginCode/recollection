@@ -4,6 +4,7 @@ use std::{
 };
 
 use crate::{event::Event, RecollectError as Error};
+use crate::event::Summary;
 
 pub trait Storage: PartialEq {
     fn new<P: Into<PathBuf>>(path: P) -> Self;
@@ -12,6 +13,7 @@ pub trait Storage: PartialEq {
         Self: Sized;
     fn write(&self) -> Result<(), Error>;
     fn events(&mut self) -> &mut Vec<Event>;
+    fn summary(&self) -> Vec<Summary>;
     fn path(&self) -> &Path;
     fn into_inner(self) -> Vec<Event>;
 }
@@ -55,6 +57,10 @@ impl Storage for JsonStorage {
 
     fn events(&mut self) -> &mut Vec<Event> {
         &mut self.events
+    }
+
+    fn summary(&self) -> Vec<Summary> {
+        self.events.iter().map(|e| e.summary()).collect()
     }
 
     fn path(&self) -> &Path {

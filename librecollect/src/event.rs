@@ -140,7 +140,7 @@ impl Event {
 
         Ok(())
     }
-    
+
     /// Returns the summary of the event.
     pub fn summary(&self) -> Summary {
         Summary {

@@ -3,8 +3,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::{event::Event, RecollectError as Error};
 use crate::event::Summary;
+use crate::{event::Event, RecollectError as Error};
 
 pub trait Storage: PartialEq {
     fn new<P: Into<PathBuf>>(path: P) -> Self;

@@ -101,18 +101,18 @@ pub(crate) fn select_edit<S: Storage>(storage: &mut S) -> Result<()> {
 }
 
 pub(crate) fn disable<S: Storage>(storage: &mut S) -> Result<()> {
-    MultiSelect::with_theme(&ColorfulTheme::default())
+    let disabled = MultiSelect::with_theme(&ColorfulTheme::default())
         .with_prompt("Select events to be edited")
         .items(&storage.summary())
         .defaults(&storage.events().iter().fold(Vec::new(), |mut acc, event| {
             acc.push(event.disabled);
             acc
         }))
-        .interact()?
-        .into_iter()
-        .for_each(|index| {
-            storage.events()[index].disabled = true;
-        });
+        .interact()?;
+
+    for (index, event) in storage.events().iter_mut().enumerate() {
+        event.disabled = disabled.contains(&index);
+    }
 
     Ok(())
 }

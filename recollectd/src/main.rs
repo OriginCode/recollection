@@ -4,23 +4,32 @@ use clap::Parser;
 use dirs::data_dir;
 use librecollect::{JsonStorage, Storage};
 use log::{info, warn};
-use std::thread;
+use notify::{watcher, RecursiveMode, Watcher, DebouncedEvent};
+use signal_hook::{
+    consts::{SIGINT, SIGTERM},
+    flag::register,
+};
+use std::{
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        mpsc::channel,
+        Arc,
+    },
+    thread,
+    time::Duration,
+};
 
 mod cli;
 
 use cli::Args;
 
 fn update_data<S: Storage + PartialEq>(data: &mut S) -> Result<()> {
-    let file_data = S::load(data.path())?;
-
-    if *data != file_data {
-        *data = file_data;
-        info!("Updating data from {}", data.path().display());
-        info!(
-            "Data file loaded, found {events} event(s)",
-            events = data.events().len()
-        );
-    }
+    *data = S::load(data.path())?;
+    info!("Updating data from {}", data.path().display());
+    info!(
+        "Data file loaded, found {events} event(s)",
+        events = data.events().len()
+    );
 
     Ok(())
 }
@@ -38,10 +47,22 @@ fn main() -> Result<()> {
         bail!("Data file not found");
     }
 
-    let mut data = JsonStorage::new(data_path);
+    let mut data = JsonStorage::load(data_path)?;
 
-    loop {
-        update_data(&mut data)?;
+    // Monitor the data file
+    let (tx, rx) = channel();
+    let mut watcher = watcher(tx, Duration::from_secs(1)).unwrap();
+    watcher.watch(data.path(), RecursiveMode::NonRecursive)?;
+
+    // Process the signals
+    let term = Arc::new(AtomicBool::new(false));
+    register(SIGINT, term.clone())?;
+    register(SIGTERM, term.clone())?;
+
+    while !term.load(Ordering::Relaxed) {
+        if let Ok(DebouncedEvent::NoticeWrite(_)) = rx.try_recv() {
+            update_data(&mut data)?;
+        }
 
         for event in data.events() {
             if event.disabled {
@@ -60,11 +81,13 @@ fn main() -> Result<()> {
             }
         }
 
-        // Write data back to file, in case the program is closed, we can still get the missing
-        // notification sent, and also keep the file up-to-date.
-        data.write()?;
-
         // Examine the events every second.
-        thread::sleep(std::time::Duration::from_secs(1));
+        thread::sleep(Duration::from_secs(1));
     }
+
+    // Write data back to file, in case the program is terminated, we can still get the missing
+    // notification sent, and also keep the file up-to-date.
+    data.write()?;
+
+    Ok(())
 }

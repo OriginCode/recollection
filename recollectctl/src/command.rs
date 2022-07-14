@@ -47,7 +47,7 @@ pub(crate) fn add<S: Storage>(storage: &mut S) -> Result<()> {
 
 pub(crate) fn remove<S: Storage>(storage: &mut S) -> Result<()> {
     MultiSelect::with_theme(&ColorfulTheme::default())
-        .with_prompt("Select events to be removed")
+        .with_prompt("Select the events to be removed")
         .items(&storage.summary())
         .interact()?
         .into_iter()
@@ -91,7 +91,7 @@ fn edit(event: &mut Event) -> Result<()> {
 
 pub(crate) fn select_edit<S: Storage>(storage: &mut S) -> Result<()> {
     MultiSelect::with_theme(&ColorfulTheme::default())
-        .with_prompt("Select events to be edited")
+        .with_prompt("Select the events to be edited")
         .items(&storage.summary())
         .interact()?
         .into_iter()
@@ -102,7 +102,7 @@ pub(crate) fn select_edit<S: Storage>(storage: &mut S) -> Result<()> {
 
 pub(crate) fn disable<S: Storage>(storage: &mut S) -> Result<()> {
     let disabled = MultiSelect::with_theme(&ColorfulTheme::default())
-        .with_prompt("Select events to be edited")
+        .with_prompt("Select the events to be disabled, deselect the events to be enabled")
         .items(&storage.summary())
         .defaults(&storage.events().iter().fold(Vec::new(), |mut acc, event| {
             acc.push(event.disabled);

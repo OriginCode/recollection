@@ -3,8 +3,14 @@ use chrono::Utc;
 use clap::Parser;
 use dirs::data_dir;
 use librecollect::{JsonStorage, Storage};
-use log::{info, warn};
-use notify::{watcher, RecursiveMode, Watcher, DebouncedEvent};
+use log::{debug, info, warn};
+use notify_debouncer_full::{
+    new_debouncer,
+    notify::{
+        event::{DataChange, ModifyKind},
+        *,
+    },
+};
 use signal_hook::{
     consts::{SIGINT, SIGTERM},
     flag::register,
@@ -51,8 +57,10 @@ fn main() -> Result<()> {
 
     // Monitor the data file
     let (tx, rx) = channel();
-    let mut watcher = watcher(tx, Duration::from_secs(1)).unwrap();
-    watcher.watch(data.path(), RecursiveMode::NonRecursive)?;
+    let mut debouncer = new_debouncer(Duration::from_secs(5), None, tx).unwrap();
+    debouncer
+        .watcher()
+        .watch(data.path(), RecursiveMode::NonRecursive)?;
 
     // Process the signals
     let term = Arc::new(AtomicBool::new(false));
@@ -60,8 +68,15 @@ fn main() -> Result<()> {
     register(SIGTERM, term.clone())?;
 
     while !term.load(Ordering::Relaxed) {
-        if let Ok(DebouncedEvent::NoticeWrite(_)) = rx.try_recv() {
-            update_data(&mut data)?;
+        if let Ok(Ok(events)) = rx.try_recv() {
+            debug!("File Monitor Events: {:?}", events);
+            events.iter().try_for_each(|e| {
+                if e.event.kind == EventKind::Modify(ModifyKind::Data(DataChange::Content)) {
+                    update_data(&mut data)
+                } else {
+                    Ok(())
+                }
+            })?;
         }
 
         for event in data.events() {
